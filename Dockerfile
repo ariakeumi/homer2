@@ -52,8 +52,6 @@ COPY server/config-api.cgi /www/api/config.cgi
 
 RUN chmod +x /entrypoint.sh /etc/lighttpd/ipv6.sh /www/api/config.cgi
 
-USER ${UID}:${GID}
-
 HEALTHCHECK --start-period=10s --start-interval=1s --interval=30s --timeout=5s --retries=3 \
     CMD wget --no-verbose -Y off --tries=1 --spider http://127.0.0.1:${PORT}/ || exit 1
 
