@@ -1,6 +1,9 @@
 # Build & publish docker images
 name: Dockerhub
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 on:
   push:
     branches: [main]
@@ -18,7 +21,7 @@ jobs:
       DOCKERHUB_IMAGE: ${{ vars.DOCKERHUB_IMAGE != '' && vars.DOCKERHUB_IMAGE || format('{0}/homer2', secrets.DOCKERHUB_USERNAME) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
