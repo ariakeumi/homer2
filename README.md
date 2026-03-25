@@ -84,7 +84,7 @@ docker run -d \
   -p 8080:8080 \
   --mount type=bind,source="/path/to/config/dir",target=/www/assets \
   --restart=unless-stopped \
-  b4bz/homer:latest
+  b4bz/homer2:latest
 ```
 
 > [!NOTE]  
@@ -95,7 +95,7 @@ docker run -d \
 ```yaml
 services:
   homer:
-    image: b4bz/homer
+    image: b4bz/homer2
     container_name: homer
     volumes:
       - /path/to/config/dir:/www/assets # Make sure your local config directory exists

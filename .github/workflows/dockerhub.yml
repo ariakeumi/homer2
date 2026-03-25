@@ -15,7 +15,7 @@ jobs:
       contents: read
       packages: write
     env:
-      DOCKERHUB_IMAGE: ${{ vars.DOCKERHUB_IMAGE != '' && vars.DOCKERHUB_IMAGE || format('{0}/homer', secrets.DOCKERHUB_USERNAME) }}
+      DOCKERHUB_IMAGE: ${{ vars.DOCKERHUB_IMAGE != '' && vars.DOCKERHUB_IMAGE || format('{0}/homer2', secrets.DOCKERHUB_USERNAME) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
