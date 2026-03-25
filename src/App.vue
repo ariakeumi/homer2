@@ -1,6 +1,7 @@
 <template>
+  <ConfigEditor v-if="editorMode" />
   <div
-    v-if="config"
+    v-else-if="config"
     id="app"
     :class="[
       `theme-${config.theme}`,
@@ -31,6 +32,14 @@
         :links="config.links"
         @navbar-toggle="showMenu = !showMenu"
       >
+        <a
+          class="navbar-item is-inline-block-mobile"
+          :href="editorUrl()"
+          title="Open configuration editor"
+        >
+          <span><i class="fas fa-fw fa-file-pen"></i></span>
+        </a>
+
         <DarkMode
           :default-value="config.defaults.colorTheme"
           @updated="isDark = $event"
@@ -114,6 +123,7 @@ import SearchInput from "./components/SearchInput.vue";
 import SettingToggle from "./components/SettingToggle.vue";
 import DarkMode from "./components/DarkMode.vue";
 import DynamicTheme from "./components/DynamicTheme.vue";
+import ConfigEditor from "./components/ConfigEditor.vue";
 
 import defaultConfig from "./assets/defaults.yml?raw";
 
@@ -129,10 +139,12 @@ export default {
     SettingToggle,
     DarkMode,
     DynamicTheme,
+    ConfigEditor,
   },
   data: function () {
     return {
       loaded: false,
+      editorMode: false,
       currentPage: null,
       configNotFound: false,
       config: null,
@@ -150,6 +162,13 @@ export default {
     },
   },
   created: async function () {
+    this.editorMode = this.isEditorMode();
+    if (this.editorMode) {
+      this.loaded = true;
+      console.info(`Homer v${__APP_VERSION__}`);
+      return;
+    }
+
     this.buildDashboard();
     window.onhashchange = this.buildDashboard;
     this.loaded = true;
@@ -159,6 +178,17 @@ export default {
     window.onhashchange = null;
   },
   methods: {
+    isEditorMode: function () {
+      return new URLSearchParams(window.location.search).get("editor") === "1";
+    },
+    editorUrl: function () {
+      const url = new URL(window.location);
+      url.searchParams.delete("search");
+      url.searchParams.set("editor", "1");
+      url.searchParams.delete("file");
+      url.hash = "";
+      return `${url.pathname}${url.search}`;
+    },
     searchHotkey() {
       if (this.config.hotkey && this.config.hotkey.search) {
         return this.config.hotkey.search;
@@ -201,7 +231,7 @@ export default {
       }
     },
     getConfig: function (path = "assets/config.yml") {
-      return fetch(path).then((response) => {
+      return fetch(path, { cache: "no-store" }).then((response) => {
         if (response.status == 404 || response.redirected) {
           this.configNotFound = true;
           return {};

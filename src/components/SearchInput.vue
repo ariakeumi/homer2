@@ -17,6 +17,8 @@
 </template>
 
 <script>
+const additionalSearchHotkeys = ["f"];
+
 export default {
   name: "SearchInput",
   props: {
@@ -28,16 +30,26 @@ export default {
   },
   emits: ["search-open", "search-focus", "search-cancel", "input"],
   mounted() {
-    this._keyListener = function (event) {
-      if (!this.hasFocus() && event.key === this.hotkey) {
-        event.preventDefault();
-        this.focus();
+    this._keyListener = (event) => {
+      if (!this.matchesSearchHotkey(event)) {
+        return;
       }
+
+      if (this.hasFocus()) {
+        return;
+      }
+
+      event.preventDefault();
+      this.focus();
+    };
+
+    this._escapeListener = (event) => {
       if (event.key === "Escape") {
         this.cancel();
       }
     };
-    document.addEventListener("keydown", this._keyListener.bind(this));
+    document.addEventListener("keydown", this._keyListener);
+    document.addEventListener("keydown", this._escapeListener);
 
     // fill search from get parameter.
     const search = new URLSearchParams(window.location.search).get("search");
@@ -49,8 +61,16 @@ export default {
   },
   beforeUnmount() {
     document.removeEventListener("keydown", this._keyListener);
+    document.removeEventListener("keydown", this._escapeListener);
   },
   methods: {
+    matchesSearchHotkey: function (event) {
+      const hotkeys = [this.hotkey, ...additionalSearchHotkeys]
+        .filter(Boolean)
+        .map((hotkey) => hotkey.toLowerCase());
+
+      return hotkeys.includes(event.key.toLowerCase());
+    },
     open: function (target = null) {
       if (!this.$refs.search.value) {
         return;

@@ -13,6 +13,10 @@ if [[ "${INIT_ASSETS}" == "1" ]] && [[ ! -f "/www/assets/config.yml" ]]; then
     fi
 fi
 
+if [[ -n "${CONFIG_EDITOR_TOKEN}" ]]; then
+    echo "Config editor API enabled"
+fi
+
 echo "Starting webserver"
 exec 3>&1
 exec lighttpd -D -f /lighttpd.conf

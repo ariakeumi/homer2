@@ -12,6 +12,9 @@
           Get started →
         </a>
       </p>
+      <p>
+        <a class="button is-dark mt-3" href="?editor=1">Open web editor</a>
+      </p>
     </div>
   </article>
 </template>

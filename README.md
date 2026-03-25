@@ -121,6 +121,9 @@ If you would like to change internal port of Homer from default `8080` to your p
 - **`IPV6_DISABLE`** (default: 0)
 Set to `1` to disable listening on IPv6.
 
+- **`CONFIG_EDITOR_TOKEN`** (default: unset)
+Enable the built-in web editor for YAML files in `/assets`. When set, open `/?editor=1`, enter the token, and save changes directly on the server.
+
 ### Using the release tarball (prebuilt, ready to use)
 
 Download and extract the latest release (`homer.zip`) from the [release page](https://github.com/bastienwirtz/homer/releases), rename the `assets/config.yml.dist` file to `assets/config.yml`, and put it behind a web server.

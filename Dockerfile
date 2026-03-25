@@ -47,6 +47,10 @@ COPY lighttpd-ipv6.sh /etc/lighttpd/ipv6.sh
 COPY entrypoint.sh /entrypoint.sh
 COPY --from=build-stage --chown=${UID}:${GID} /app/dist /www/
 COPY --from=build-stage --chown=${UID}:${GID} /app/dist/assets /www/default-assets
+RUN mkdir -p /www/api
+COPY server/config-api.cgi /www/api/config.cgi
+
+RUN chmod +x /entrypoint.sh /etc/lighttpd/ipv6.sh /www/api/config.cgi
 
 USER ${UID}:${GID}
 
