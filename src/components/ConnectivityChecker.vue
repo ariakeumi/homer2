@@ -66,11 +66,13 @@ export default {
     },
     handleOffline: function () {
       this.offline = true;
+      this.$emit("network-status-update", this.offline);
     },
     checkOffline: function () {
       // Global online check
       if (!navigator.onLine) {
         this.offline = true;
+        this.$emit("network-status-update", this.offline);
         return;
       }
 

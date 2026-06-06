@@ -72,7 +72,7 @@
 
         <GetStarted v-if="configurationNeeded" />
 
-        <div v-if="!offline">
+        <div>
           <!-- Optional messages -->
           <Message :item="config.message" />
 
@@ -126,6 +126,9 @@ import DynamicTheme from "./components/DynamicTheme.vue";
 import ConfigEditor from "./components/ConfigEditor.vue";
 
 import defaultConfig from "./assets/defaults.yml?raw";
+
+const configCachePrefix = "homer.configCache.";
+const defaultConfigPath = "assets/config.yml";
 
 export default {
   name: "App",
@@ -230,8 +233,34 @@ export default {
         this.createStylesheet(stylesheet);
       }
     },
-    getConfig: function (path = "assets/config.yml") {
-      return fetch(path, { cache: "no-store" }).then((response) => {
+    configCacheKey: function (path) {
+      return `${configCachePrefix}${new URL(path, window.location.href).href}`;
+    },
+    readCachedConfig: function (path) {
+      try {
+        return localStorage.getItem(this.configCacheKey(path));
+      } catch (error) {
+        console.warn("Unable to read cached Homer configuration", error);
+        return null;
+      }
+    },
+    cacheConfig: function (path, body) {
+      try {
+        localStorage.setItem(this.configCacheKey(path), body);
+      } catch (error) {
+        console.warn("Unable to cache Homer configuration", error);
+      }
+    },
+    parseConfigBody: function (body) {
+      const config = parse(body, { merge: true }) || {};
+      if (config.externalConfig) {
+        return this.getConfig(config.externalConfig);
+      }
+      return config;
+    },
+    getConfig: async function (path = defaultConfigPath) {
+      try {
+        const response = await fetch(path, { cache: "no-store" });
         if (response.status == 404 || response.redirected) {
           this.configNotFound = true;
           return {};
@@ -241,19 +270,31 @@ export default {
           throw Error(`${response.statusText}: ${response.body}`);
         }
 
-        const that = this;
-        return response
-          .text()
-          .then((body) => {
-            return parse(body, { merge: true });
-          })
-          .then(function (config) {
-            if (config.externalConfig) {
-              return that.getConfig(config.externalConfig);
-            }
-            return config;
-          });
-      });
+        const body = await response.text();
+        this.cacheConfig(path, body);
+        return this.parseConfigBody(body);
+      } catch (error) {
+        if (!(error instanceof TypeError)) {
+          throw error;
+        }
+
+        const cachedBody = this.readCachedConfig(path);
+        if (cachedBody) {
+          this.offline = true;
+          console.info(`Using cached Homer configuration for ${path}`);
+          return this.parseConfigBody(cachedBody);
+        }
+
+        this.offline = true;
+        if (path !== defaultConfigPath) {
+          console.warn(`No cached Homer page configuration for ${path}`);
+          return {};
+        }
+
+        this.configNotFound = true;
+        console.warn("No cached Homer configuration is available");
+        return {};
+      }
     },
     matchesFilter: function (item) {
       const needle = this.filter?.toLowerCase();
