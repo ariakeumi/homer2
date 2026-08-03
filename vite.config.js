@@ -198,6 +198,29 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: null,
+        runtimeCaching: [
+          {
+            // Logos can be configured with an absolute URL. They are not part
+            // of the precache manifest, so cache cross-origin image requests
+            // when they are first displayed.
+            urlPattern: ({ request, url }) =>
+              request.destination === "image" &&
+              url.origin !== self.location.origin,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "homer-external-images",
+              cacheableResponse: {
+                // 0 allows opaque cross-origin image responses.
+                statuses: [0, 200],
+              },
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+                purgeOnQuotaError: true,
+              },
+            },
+          },
+        ],
       },
     }),
   ],
