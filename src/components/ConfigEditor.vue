@@ -386,7 +386,24 @@ export default {
   min-height: 100vh;
 }
 
+.section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-block: 1.5rem;
+}
+
+.container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 .editor-shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   padding: 1.5rem;
   border-radius: 1.5rem;
   background: var(--card-background);
@@ -398,7 +415,7 @@ export default {
   gap: 1rem;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .eyebrow {
@@ -421,7 +438,7 @@ export default {
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
-  margin: 1.5rem 0 1rem;
+  margin: 1rem 0;
 }
 
 .toolbar-status {
@@ -430,11 +447,19 @@ export default {
 }
 
 .editor-area {
-  margin-top: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.75rem;
+  min-height: 0;
 }
 
 .editor-textarea {
-  min-height: 60vh;
+  flex: 1 1 auto;
+  /* Bulma caps .textarea at ~600px; lift it so the textarea can fill the
+     viewport height handled by the flex layout above. */
+  max-height: none;
+  min-height: 40vh;
   resize: vertical;
   border-radius: 1rem;
   font-family:
@@ -445,7 +470,7 @@ export default {
 }
 
 .editor-note {
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
   color: var(--text-subtitle);
   font-size: 0.9rem;
 }
