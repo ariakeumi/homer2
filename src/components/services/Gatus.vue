@@ -42,7 +42,7 @@ export default {
   created() {
     const updateInterval = parseInt(this.item.updateInterval, 10) || 0;
     if (updateInterval > 0) {
-      setInterval(() => this.fetchStatus(), updateInterval);
+      this.setInterval(() => this.fetchStatus(), updateInterval);
     }
     this.fetchStatus();
   },

@@ -40,7 +40,6 @@ export default {
     maxRetries: 3,
     retryDelay: 5000,
     localCheckInterval: 1000, // Default value or a fallback
-    pollInterval: null,
   }),
   computed: {
     percentage: function () {
@@ -65,11 +64,6 @@ export default {
       this.fetchStatus_v5();
     }
   },
-  beforeUnmount() {
-    if (parseInt(this.item.apiVersion, 10) === 6) {
-      this.stopStatusPolling();
-    }
-  },
   methods: {
     handleError: function (error, status) {
       console.error(error);
@@ -81,15 +75,8 @@ export default {
       if (this.localCheckInterval < 1000) {
         this.localCheckInterval = 1000;
       }
-      this.pollInterval = setInterval(
-        this.fetchStatus,
-        this.localCheckInterval,
-      );
-    },
-    stopStatusPolling: function () {
-      if (this.pollInterval) {
-        clearInterval(this.pollInterval);
-      }
+      // Cleared automatically on unmount by the service mixin.
+      this.setInterval(this.fetchStatus, this.localCheckInterval);
     },
     loadCachedSession: function () {
       try {

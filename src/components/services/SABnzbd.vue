@@ -82,7 +82,7 @@ export default {
   created() {
     const downloadInterval = parseInt(this.item.downloadInterval, 10) || 0;
     if (downloadInterval > 0) {
-      setInterval(() => this.fetchStatus(), downloadInterval);
+      this.setInterval(() => this.fetchStatus(), downloadInterval);
     }
 
     this.fetchStatus();

@@ -23,6 +23,7 @@ export default {
   data: function () {
     return {
       message: {},
+      refreshTimer: null,
     };
   },
   computed: {
@@ -39,6 +40,12 @@ export default {
     // Look for a new message if an endpoint is provided.
     this.message = Object.assign({}, this.item);
     await this.getMessage();
+  },
+  beforeUnmount: function () {
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+      this.refreshTimer = null;
+    }
   },
   methods: {
     getMessage: async function () {
@@ -62,7 +69,14 @@ export default {
       }
 
       if (this.item.refreshInterval) {
-        setTimeout(this.getMessage, this.item.refreshInterval);
+        // Re-schedule only while the component is still alive.
+        if (this.refreshTimer) {
+          clearTimeout(this.refreshTimer);
+        }
+        this.refreshTimer = setTimeout(
+          this.getMessage,
+          this.item.refreshInterval,
+        );
       }
     },
 

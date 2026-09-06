@@ -37,7 +37,7 @@
           :href="editorUrl()"
           title="Open configuration editor"
         >
-          <span><i class="fas fa-fw fa-file-pen"></i></span>
+          <span><i class="fas fa-fw fa-gear"></i></span>
         </a>
 
         <DarkMode
@@ -56,7 +56,7 @@
         <SearchInput
           class="navbar-item is-inline-block-mobile"
           :hotkey="searchHotkey()"
-          @input="filterServices($event)"
+          @input="filterServicesDebounced($event)"
           @search-focus="showMenu = true"
           @search-open="navigateToFirstService"
           @search-cancel="filterServices()"
@@ -179,6 +179,7 @@ export default {
   },
   beforeUnmount() {
     window.onhashchange = null;
+    clearTimeout(this._filterTimer);
   },
   methods: {
     isEditorMode: function () {
@@ -198,6 +199,9 @@ export default {
       }
     },
     buildDashboard: async function () {
+      // Drop any pending debounced filter: the dashboard is being rebuilt
+      // from the config, a stale search result would override it.
+      clearTimeout(this._filterTimer);
       const defaults = parse(defaultConfig);
       let config;
       try {
@@ -340,6 +344,12 @@ export default {
         },
       ];
     },
+    // Debounced wrapper so typing in the search box doesn't rebuild the
+    // whole service tree (and remount every polling card) on each keypress.
+    filterServicesDebounced: function (filter) {
+      clearTimeout(this._filterTimer);
+      this._filterTimer = setTimeout(() => this.filterServices(filter), 200);
+    },
     handleErrors: function (title, content) {
       return {
         message: {
@@ -350,9 +360,13 @@ export default {
       };
     },
     createStylesheet: function (css) {
-      let style = document.createElement("style");
-      style.appendChild(document.createTextNode(css));
-      document.head.appendChild(style);
+      // Replace the previously injected stylesheet instead of appending a
+      // new one on every page (hash) change.
+      if (!this._stylesheet) {
+        this._stylesheet = document.createElement("style");
+        document.head.appendChild(this._stylesheet);
+      }
+      this._stylesheet.textContent = css;
     },
   },
 };

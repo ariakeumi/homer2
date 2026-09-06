@@ -23,6 +23,8 @@
 </template>
 
 <script>
+import service from "@/mixins/service.js";
+
 // Units to add to download and upload rates.
 const units = ["B", "kiB", "MiB", "GiB"];
 
@@ -46,6 +48,7 @@ const displayRate = (rate) => {
 
 export default {
   name: "RTorrent",
+  mixins: [service],
   props: { item: Object },
   // Properties for download, upload, torrent count and errors.
   data: () => ({ dl: null, ul: null, count: null, error: null }),
@@ -65,11 +68,11 @@ export default {
     const torrentInterval = parseInt(this.item.torrentInterval, 10) || 0;
 
     if (rateInterval > 0) {
-      setInterval(() => this.fetchRates(), rateInterval);
+      this.setInterval(() => this.fetchRates(), rateInterval);
     }
 
     if (torrentInterval > 0) {
-      setInterval(() => this.fetchCount(), torrentInterval);
+      this.setInterval(() => this.fetchCount(), torrentInterval);
     }
 
     // Fetch the initial values.

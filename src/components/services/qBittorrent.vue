@@ -64,10 +64,10 @@ export default {
     const rateInterval = parseInt(this.item.rateInterval, 10) || 0;
     const torrentInterval = parseInt(this.item.torrentInterval, 10) || 0;
     if (rateInterval > 0) {
-      setInterval(() => this.getRate(), rateInterval);
+      this.setInterval(() => this.getRate(), rateInterval);
     }
     if (torrentInterval > 0) {
-      setInterval(() => this.fetchCount(), torrentInterval);
+      this.setInterval(() => this.fetchCount(), torrentInterval);
     }
 
     this.getRate();

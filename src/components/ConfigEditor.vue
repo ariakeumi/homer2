@@ -6,11 +6,6 @@
           <div class="editor-header">
             <div>
               <p class="eyebrow">Configuration Editor</p>
-              <h1 class="title is-3">Edit server YAML</h1>
-              <p class="subtitle is-6">
-                Changes are written directly to the server-side
-                <code>assets/</code> directory.
-              </p>
             </div>
             <a class="button is-light" :href="dashboardUrl()">
               Back to dashboard
@@ -61,9 +56,7 @@
                   <i class="fas fa-key"></i>
                 </span>
               </div>
-              <p class="help">
-                Stored only in this browser session.
-              </p>
+              <p class="help">Stored only in this browser session.</p>
             </div>
           </div>
 
@@ -328,12 +321,12 @@ export default {
           response.headers.get("X-Homer-Config-Template") === "1";
         this.validateContent();
         this.syncLocation();
-        this.setMessage(
-          "info",
-          this.loadedFromTemplate
-            ? "No live file was found, so the matching template was loaded. Save to create the file on the server."
-            : "Configuration loaded from the server.",
-        );
+        if (this.loadedFromTemplate) {
+          this.setMessage(
+            "info",
+            "No live file was found, so the matching template was loaded. Save to create the file on the server.",
+          );
+        }
       } catch (error) {
         this.setMessage(
           "error",
@@ -375,7 +368,6 @@ export default {
         this.loadedContent = this.content;
         this.loadedFromTemplate = false;
         this.syncLocation();
-        this.setMessage("info", "Configuration saved to the server.");
       } catch (error) {
         this.setMessage(
           "error",

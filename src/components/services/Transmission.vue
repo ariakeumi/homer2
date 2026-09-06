@@ -73,7 +73,7 @@ export default {
 
     // Set up interval if configured
     if (interval > 0) {
-      setInterval(() => this.getStats(), interval);
+      this.setInterval(() => this.getStats(), interval);
     }
 
     // Initial fetch
