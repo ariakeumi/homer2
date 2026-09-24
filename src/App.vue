@@ -34,8 +34,8 @@
       >
         <a
           class="navbar-item is-inline-block-mobile"
-          :href="editorUrl()"
           title="Open configuration editor"
+          @click="openEditorModal"
         >
           <span><i class="fas fa-fw fa-gear"></i></span>
         </a>
@@ -107,6 +107,13 @@
         ></div>
       </div>
     </footer>
+
+    <EditorTokenModal
+      :open="showEditorModal"
+      :initial-token="storedEditorToken"
+      @close="showEditorModal = false"
+      @submit="openEditor"
+    />
   </div>
 </template>
 
@@ -124,6 +131,7 @@ import SettingToggle from "./components/SettingToggle.vue";
 import DarkMode from "./components/DarkMode.vue";
 import DynamicTheme from "./components/DynamicTheme.vue";
 import ConfigEditor from "./components/ConfigEditor.vue";
+import EditorTokenModal from "./components/EditorTokenModal.vue";
 
 import defaultConfig from "./assets/defaults.yml?raw";
 
@@ -143,6 +151,7 @@ export default {
     DarkMode,
     DynamicTheme,
     ConfigEditor,
+    EditorTokenModal,
   },
   data: function () {
     return {
@@ -157,6 +166,8 @@ export default {
       vlayout: true,
       isDark: null,
       showMenu: false,
+      showEditorModal: false,
+      storedEditorToken: "",
     };
   },
   computed: {
@@ -192,6 +203,28 @@ export default {
       url.searchParams.delete("file");
       url.hash = "";
       return `${url.pathname}${url.search}`;
+    },
+    // Opens the token dialog; a previously stored token is offered as the
+    // initial value so it doesn't need to be retyped on every visit.
+    openEditorModal: function () {
+      let stored = "";
+      try {
+        // Must match tokenStorageKey in ConfigEditor.vue.
+        stored = sessionStorage.getItem("homer.configEditor.token") || "";
+      } catch {
+        stored = "";
+      }
+      this.storedEditorToken = stored;
+      this.showEditorModal = true;
+    },
+    openEditor: function (token) {
+      try {
+        sessionStorage.setItem("homer.configEditor.token", token);
+      } catch (error) {
+        console.warn("Unable to store the editor token", error);
+      }
+      this.showEditorModal = false;
+      window.location.assign(this.editorUrl());
     },
     searchHotkey() {
       if (this.config.hotkey && this.config.hotkey.search) {

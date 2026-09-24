@@ -20,46 +20,6 @@
             <div class="message-body">{{ message.text }}</div>
           </article>
 
-          <div class="field-grid">
-            <div class="field">
-              <label class="label" for="editor-file">YAML file</label>
-              <div class="control">
-                <input
-                  id="editor-file"
-                  v-model.trim="fileName"
-                  class="input"
-                  type="text"
-                  placeholder="config.yml"
-                  spellcheck="false"
-                />
-              </div>
-              <p class="help">
-                Edit <code>config.yml</code> or another <code>.yml</code> file
-                in <code>assets/</code>.
-              </p>
-            </div>
-
-            <div class="field">
-              <label class="label" for="editor-token">Editor token</label>
-              <div class="control has-icons-right">
-                <input
-                  id="editor-token"
-                  v-model="token"
-                  class="input"
-                  type="password"
-                  placeholder="Enter CONFIG_EDITOR_TOKEN"
-                  autocomplete="current-password"
-                  spellcheck="false"
-                  @keyup.enter="loadConfig"
-                />
-                <span class="icon is-small is-right">
-                  <i class="fas fa-key"></i>
-                </span>
-              </div>
-              <p class="help">Stored only in this browser session.</p>
-            </div>
-          </div>
-
           <div class="toolbar">
             <button
               class="button is-light"
@@ -83,9 +43,6 @@
               @click="resetContent"
             >
               Reset changes
-            </button>
-            <button class="button is-ghost" @click="clearToken">
-              Clear token
             </button>
 
             <span class="toolbar-status">
@@ -182,10 +139,14 @@ export default {
   },
   created: function () {
     document.title = "Config Editor | Homer";
-    this.validateContent();
-    if (this.token) {
-      this.loadConfig();
+    if (!this.token) {
+      // The token is only provided through the dialog on the dashboard;
+      // without it there is nothing to do here.
+      window.location.replace(this.dashboardUrl());
+      return;
     }
+    this.validateContent();
+    this.loadConfig();
     window.addEventListener("beforeunload", this.handleBeforeUnload);
   },
   beforeUnmount: function () {
@@ -277,14 +238,6 @@ export default {
       event.preventDefault();
       event.returnValue = "";
     },
-    clearToken: function () {
-      this.token = "";
-      sessionStorage.removeItem(tokenStorageKey);
-      this.setMessage(
-        "info",
-        "Editor token cleared from this browser session.",
-      );
-    },
     resetContent: function () {
       this.content = this.loadedContent;
       this.validateContent();
@@ -293,11 +246,6 @@ export default {
     loadConfig: async function () {
       if (!this.fileNameValid) {
         this.setMessage("error", "Choose a valid .yml file name first.");
-        return;
-      }
-
-      if (!this.token) {
-        this.setMessage("error", "Enter the editor token before loading.");
         return;
       }
 
@@ -312,6 +260,11 @@ export default {
         });
 
         if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            // A rejected token would keep failing on every visit; drop it so
+            // the dashboard dialog asks for a fresh one.
+            sessionStorage.removeItem(tokenStorageKey);
+          }
           throw new Error(await this.readResponseText(response));
         }
 
@@ -425,12 +378,6 @@ export default {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--highlight-primary);
-}
-
-.field-grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
 .toolbar {
